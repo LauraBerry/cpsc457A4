@@ -46,30 +46,50 @@ public class LinkedList<T> implements Iterable<T> {
 		//Tail
 		//Size (not required)
 		//Critical Section
+	T Head, Tail;
+	int size;
  
 	//Constructor
-    public LinkedList() {
+    public LinkedList() 
+	{
 		//Set head and tail to null
+		Head=null;
+		Tail= null;
+
 		//Set size to zero
+		size=0;
+
 		//Create new instance for the critical section
     }
 
 	//Returns the size of the list
     public int size() {
-        return 0; //either iterate through all the list and count
+
+        return  size; //either iterate through all the list and count
 					//or create an attribute that stores the size and changes
 					//every time we add or remove a node
     }
 	
+	public T getHead()
+	{
+		return Head;
+	}
+	
+	public T getTail()
+	{
+		return Tail;
+	}
 	//Checks if the list is empty
 	public boolean isEmpty() {
-        return true; //size == 0
+        return(size==0); //size == 0
     }
 	
 	//Deletes all the nodes in the list
 	public void clear() {
 		//just set the head and tail to null (the garbage collector takes care of the rest)
 			//cpp developers: be careful, you have to destroy them first
+			Head = null;
+			Tail = null;
 		
 		//What if the merge sort is running now in a thread
 			//I should not be able to delete the nodes (and vice versa)
@@ -78,9 +98,21 @@ public class LinkedList<T> implements Iterable<T> {
 	
 	//Adds a new node to the list at the end (tail)
     public LinkedList<T> append(T t) {
-        return this;
 		//Check if it is empty 
 			//head = tail = t
+		if(false)//isEmpty())
+		{
+			Head = t;
+			Tail=t;
+		}
+		else
+		{
+			/*Tail.next=t;
+			t.prev=Tail;
+			Tail=t;*/
+		}
+		size++;
+        return this;
 		//Else add to the tail and move the tail to the end
 			//tail.next = t    then		tail = t
 		
@@ -89,13 +121,26 @@ public class LinkedList<T> implements Iterable<T> {
 
 	//Gets a node's value at a specific index
     public T get(int index) {
-		return null;
+		//Laura:we are assuming this linked list is zero indexed.
+
 		//Iterate through the list
 			//Create a new pointer that starts at the head
 			//Keeps moving forward (pt = pt.next) for index times
 			//then return that object
-		
+		if(index< size)
+		{
+			T result=Head;		
+			for (int i=0; i<index; i++)
+			{
+				/*result=result.next;*/
+			}
+			return result;
+		}
 		//Make sure not to exceed the size of the list (else return null)
+		else
+		{
+			return null;
+		}
     }
 	
 	@Override
@@ -145,10 +190,22 @@ public class LinkedList<T> implements Iterable<T> {
 		//to merge sort the link list and then they will fix its 
 		//attributes (head and tail pointers)
 		
-		public void sort(LinkedList<T> list) {
+		public void sort(LinkedList<T> list)
+		{
+			// call correct function
+			LinkedList<T> sortedList = msort(list);
+
+			// fix list attributes (head and tail pointers)
+			
 		}
 
-		public void parallel_sort(LinkedList<T> list) {			
+		public void parallel_sort(LinkedList<T> list)
+		{
+			// call correct function
+			LinkedList<T> sortedList = parallel_msort(list);
+
+			// fix list attributes (head and tail pointers)
+			
 		}
 		
 		//#########
@@ -159,6 +216,61 @@ public class LinkedList<T> implements Iterable<T> {
 			//Split the list to two parts
 			//Merge sort each part
 			//Merge the two sorted parts together
+
+		// sequential merge sort
+		public LinkedList<T> msort(LinkedList<T> list)
+		{
+			LinkedList<T> sortedList;
+
+			// split list
+
+			//if false return list else recurse
+
+
+			// if (size==1){merge sort}
+
+			// merge
+
+			return null;//sortedList;
+		}
+		
+		// parallel merge sort
+		public LinkedList<T> parallel_msort(LinkedList<T> list)
+		{
+			LinkedList<T> sortedList;
+
+			// split list
+
+			//if false return list else recurse
+
+
+			// if (size==1){merge sort}
+
+			// merge
+
+			return null;//sortedList;
+		}
+
+		public boolean split(LinkedList<T> list)
+		{
+			if(list.size()==0)
+			{
+				return false;				
+			}
+			else if(list.size()==1)
+			{
+				return false;
+			}
+			else 
+			{
+				LinkedList<T> list1;
+				T List1Head=list.getHead();
+				T List1Tail=list.get(list.size/2);
+				//T List2Head=List1Tail.next;
+				T List2Tail=list.getTail();	
+				return true;
+			}
+		}
 		
 		//Splitting function
 			//Run two pointers and find the middle of the a specific list

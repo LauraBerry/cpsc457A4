@@ -1,0 +1,5 @@
+questions and notes:
+
+1) what is the critical section's data type?
+2) is a linked list zero indexed?
+3) what does it mean when it says return a pair?(split method)

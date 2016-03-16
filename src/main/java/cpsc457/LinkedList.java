@@ -199,6 +199,7 @@ public class LinkedList<T> implements Iterable<T> {
 		//Variables (attributes)
 			//ExecutorService
 			ExecutorService allThreads;
+			Collection mintCondition;
 
 
 			//Depth limit
@@ -303,7 +304,15 @@ public class LinkedList<T> implements Iterable<T> {
 
 			if(list.size()<12)
 			{
-				//do a thing
+				T currNodeValue=list.head.value;
+				Node<T> currNode=list.head;
+				for (int i=0; i<list.size; i++)
+				{
+					currentList.append(currNodeValue);
+					currNode=currNode.next;
+					currNodeValue=currNode.value;			
+					//Thread.submit(currentList);
+				}
 			}
 			else if (list.size()>12)
 			{
@@ -322,6 +331,14 @@ public class LinkedList<T> implements Iterable<T> {
 						}
 						//Thread.submit(currentList);
 					}
+					try
+					{
+						List<Future<T>> mergers = allThreads.invokeAll(mintCondition);
+					}
+					catch (Exception e)
+					{
+						System.out.println("exception thrown");
+					}
 // each thread gets a section
 				}
 				else
@@ -329,13 +346,60 @@ public class LinkedList<T> implements Iterable<T> {
 					int addOn=list.size()%12;
 					int sectionSize=list.size()/12;
 					int lastSectionSize=sectionSize+addOn;
+
+					T currNodeValue=list.head.value;
+					Node<T> currNode=list.head;
+
+					for (int i=0; i<11; i++)
+					{
+						for(int j=0; j<sectionSize; j++)
+						{
+							currentList.append(currNodeValue);
+							currNode=currNode.next;
+							currNodeValue=currNode.value;			
+						}
+						//Thread.submit(currentList);
+					}
+					for(int j=0; j<lastSectionSize; j++)
+						{
+							currentList.append(currNodeValue);
+							currNode=currNode.next;
+							currNodeValue=currNode.value;			
+						}
+						//Thread.submit(currentList);
+						//mintCondition.add(Thread);
 					//the last thread gets the larger section.
+					try
+					{
+						List<Future<T>> mergers = allThreads.invokeAll(mintCondition);
+					}
+					catch (Exception e)
+					{
+						System.out.println("exception thrown");
+					}
 				}
 			}
 			else
 			{
-				
+				T currNodeValue=list.head.value;
+				Node<T> currNode=list.head;
+				for (int i=0; i<12; i++)
+				{	
+					currentList.append(currNodeValue);
+					currNode=currNode.next;
+					currNodeValue=currNode.value;			
+					//Thread.submit(currentList);
+				}
+				try
+				{
+					List<Future<T>> mergers = allThreads.invokeAll(mintCondition);
+				}
+				catch (Exception e)
+				{
+					System.out.println("exception thrown");
+				}
 			}
+
 			// split list
             Pair<LinkedList<T>,LinkedList<T>> split = split(list);
             LinkedList<T> list1 = split.fst();

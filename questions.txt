@@ -22,6 +22,8 @@ questions and notes:
 
 9) how to get a specific thread from the pool?
 
+10) how to set it up such that each thread does something?
+
 
 	-he implied that size should be of type T instead of int.
 

@@ -1,5 +1,28 @@
 questions and notes:
 
-1) what is the critical section's data type?
-2) is a linked list zero indexed?
-3) what does it mean when it says return a pair?(split method)
+1) 	what is the critical section's data type?
+	deflected question, will go over in next tutorial -> implied it's Mutex
+	
+2) 	is a linked list zero indexed?
+	doesn't matter as long as we document it (we decide how to use the get(index) function ourselves)
+
+3) 	what does it mean when it says return a pair?(split method)
+	there is a Pair class
+
+4) 	what is the equivalent of Node a.next in class T?
+	wrapped T in the Node class -> did not confirm but that's what I did, it seems to be okay
+	
+5)what does the iterator do exactly?
+
+6) where do we decide what the depth limit is?
+
+7) how do we decide how many threads we need? we are currently using listSize/depthLimit
+
+8) what is comp in merge sort?
+
+9) how to get a specific thread from the pool?
+
+
+	-he implied that size should be of type T instead of int.
+
+

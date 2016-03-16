@@ -41,7 +41,32 @@ public class RandomTests {
             i++;
         }
     }
+	//Laura: if it is properly sorted each element shoulr be less than the next element.
+	//not implimented, need to impliment the iterator to make it work (?)
+	
+	/*
+		//DO NOT say linkedlist= new linkedlist that will break the whole thing!!! 
+		long start = System.currentTimeMillis();
+        LinkedList.par_sort(list);
+        long end = System.currentTimeMillis();
 
+        System.err.println();
+        System.err.println("Processors: "+Runtime.getRuntime().availableProcessors());
+        System.err.println(end - start + " ms");
+        System.err.println();
+
+        int i = 0;
+        Integer prev = Integer.MIN_VALUE;
+	
+	// fyi: this style of for loop use the result of getIterator()
+	//   hence the initial NullPointerException
+        for(Integer num : list) { 
+            assertTrue(num + " found before " + prev + " at index " + i, num >= prev);
+            prev = num;
+            i++;
+        }
+    }
+	*/
 
     // these tests are primarilly (but not exclusively)
     // how we will evaluate the correctness of your code

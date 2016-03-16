@@ -7,9 +7,17 @@ import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Node
+public class Node<T>
 {
-	Node prev;
-	Node next;
-	int value;
+	Node<T> prev;
+	Node<T> next;
+	T value;
+    
+    Node(T value)
+    {
+        this.value = value;
+        prev = null;
+        next = null;
+    }
+    //node1.value comparison node2.value;
 }

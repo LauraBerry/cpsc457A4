@@ -12,19 +12,23 @@ questions and notes:
 4) 	what is the equivalent of Node a.next in class T?
 	wrapped T in the Node class -> did not confirm but that's what I did, it seems to be okay
 	
-5)what does the iterator do exactly?
+5)	what does the iterator do exactly?
+	used in the tests, we have to implement ourselves
+	be careful - might fail or never finish
+	avoid restarting from start of the list every time
+	don't use get in iterator
+	
+6) 	where do we decide what the depth limit is?
+	from the thread number, not hard coded (do in constructor)
 
-6) where do we decide what the depth limit is?
+7) 	how do we decide how many threads we need? we are currently using listSize/depthLimit
+	we decided it ourselves it should be the other way around
 
-7) how do we decide how many threads we need? we are currently using listSize/depthLimit
+8) 	what is comp in merge sort?
+	the compare function that defines that it is ascending
 
-8) what is comp in merge sort?
-
-9) how to get a specific thread from the pool?
+9) 	how to get a specific thread from the pool?
+	
 
 10) how to set it up such that each thread does something?
-
-
-	-he implied that size should be of type T instead of int.
-
-
+	

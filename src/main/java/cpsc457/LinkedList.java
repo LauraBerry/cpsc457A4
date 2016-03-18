@@ -276,12 +276,13 @@ public class LinkedList<T> implements Iterable<T> {
 			
 		}
 
-		public void parallel_sort(LinkedList<T> list)
+		public LinkedList<T> parallel_sort(LinkedList<T> list)
 		{
 			// call correct function
 			//LinkedList<T> sortedList = parallel_msort(list);
 
 			// fix list attributes (head and tail pointers)
+			return list;
 			
 		}
 		
@@ -323,49 +324,98 @@ public class LinkedList<T> implements Iterable<T> {
 		}
 		
 		// parallel merge sort
-		public LinkedList<T> parallel_msort(LinkedList<T> list)
+		public Node<T> parallel_msort(Node<T> list)
+		//public LinkedList<T> parallel_msort(LinkedList<T> list)
 		{
-			// if the list has only one element or no elements
-            // then it is already sorted
-            /*if(list.size() < 1)
-            {
-                System.out.println("list too small");
-
-                return list;
-            }
-            
-			LinkedList<T> sortedList;
-			LinkedList<T> currentList = new LinkedList();
-
-			if(list.size()<12)
+			if(list==null || list.next==null)
 			{
-				T currNodeValue=list.head.value;
-				Node<T> currNode=list.head;
-				for (int i=0; i<list.size; i++)
-				{
-					currentList.append(currNodeValue);
-					currNode=currNode.next;
-					currNodeValue=currNode.value;			
-					//Thread.submit(currentList);
-				}
+				return list;
 			}
-			else if (list.size()>12)
-			{
-				if(list.size()%12==0)
-				{
-					int sectionSize=list.size()/12;
-					T currNodeValue=list.head.value;
-					Node<T> currNode=list.head;
-					for (int i=0; i<12; i++)
+			LinkedList<T> currentList= new LinkedList<T>();
+			int listSize= currentList.size();
+	
+			//break list into 16 parts
+			Pair<Node<T>,Node<T>> pair = split(list);
+		    Node<T> head1 = pair.fst();
+		    Node<T> head2 = pair.snd();
+			pair = split(head1);
+		    Node<T> head3 = pair.fst();
+		    Node<T> head4 = pair.snd();
+			pair = split(head2);
+		    Node<T> head5 = pair.fst();
+		    Node<T> head6 = pair.snd();
+			pair = split(head3);
+		    Node<T> head7 = pair.fst();
+		    Node<T> head8 = pair.snd();
+			pair = split(head5);
+		    Node<T> head9 = pair.fst();
+		    Node<T> head10 = pair.snd();
+			pair = split(head4);
+		    Node<T> head11 = pair.fst();
+		    Node<T> head12 = pair.snd();
+			pair = split(head6);
+		    Node<T> head13 = pair.fst();
+		    Node<T> head14 = pair.snd();
+			pair = split(head14);
+		    Node<T> head15 = pair.fst();
+		    Node<T> head16 = pair.snd();
+
+			//code the threads should complete
+ 			 	/*try
 					{
-						for(int j=0; j<sectionSize; j++)
-						{
-							currentList.append(currNodeValue);
-							currNode=currNode.next;
-							currNodeValue=currNode.value;			
-						}
-						//Thread.submit(currentList);
+						List<Future<T>> mergers = allThreads.invokeAll(mintCondition);
 					}
+					catch (Exception e)
+					{
+						System.out.println("exception thrown");
+					}*/
+			Node<T> list1 = parallel_msort(head1);
+			Node<T> list2 = parallel_msort(head2);
+			Node<T> list3 = parallel_msort(head3);
+			Node<T> list4 = parallel_msort(head4);
+			Node<T> list5 = parallel_msort(head5);
+			Node<T> list6 = parallel_msort(head6);
+			Node<T> list7 = parallel_msort(head7);
+			Node<T> list8 = parallel_msort(head8);
+			Node<T> list9 = parallel_msort(head9);
+			Node<T> list10 = parallel_msort(head10);
+			Node<T> list11 = parallel_msort(head11);
+			Node<T> list12 = parallel_msort(head12);
+			Node<T> list13 = parallel_msort(head13);
+			Node<T> list14 = parallel_msort(head14);
+			Node<T> list15 = parallel_msort(head15);
+			Node<T> list16 = parallel_msort(head16);
+/*please note the threads should do this but for now i have it here to help the rest of the code work until we can fix the threads to work*/
+
+
+
+            //Merge the 16 sorted parts together
+            Node<T> merged1 = merge(list1,list2);
+			Node<T> merged2 = merge(list3,list4);
+			Node<T> merged3 = merge(list5,list6);
+			Node<T> merged4 = merge(list7,list8);
+			Node<T> merged5 = merge(list9,list10);
+			Node<T> merged6 = merge(list11,list12);
+			Node<T> merged7 = merge(list13,list14);
+			Node<T> merged8 = merge(list15,list16);
+
+			// merged the 8 pre-merged parts together
+			Node<T> mergedMerged1 = merge(merged1, merged2);
+			Node<T> mergedMerged2 = merge(merged3, merged4);
+			Node<T> mergedMerged3 = merge(merged5, merged6);
+			Node<T> mergedMerged4 = merge(merged7, merged8);
+
+			//merge the 4 pre-pre-merged parts together
+			Node<T> mergedMergedMerged1= merge(mergedMerged1, mergedMerged2);
+			Node<T> mergedMergedMerged2 = merge(mergedMerged3, mergedMerged4);
+
+			//finally merge the last 2 parts together.
+			Node<T> merged= merge(mergedMergedMerged1, mergedMergedMerged2);
+			/* plase note: this will probably be doable in a loop once the threads are working but for now this is how i had to do it.*/
+            
+            return merged;
+
+            /*
 					try
 					{
 						List<Future<T>> mergers = allThreads.invokeAll(mintCondition);
@@ -374,87 +424,7 @@ public class LinkedList<T> implements Iterable<T> {
 					{
 						System.out.println("exception thrown");
 					}
-// each thread gets a section
-				}
-				else
-				{
-					int addOn=list.size()%12;
-					int sectionSize=list.size()/12;
-					int lastSectionSize=sectionSize+addOn;
-
-					T currNodeValue=list.head.value;
-					Node<T> currNode=list.head;
-
-					for (int i=0; i<11; i++)
-					{
-						for(int j=0; j<sectionSize; j++)
-						{
-							currentList.append(currNodeValue);
-							currNode=currNode.next;
-							currNodeValue=currNode.value;			
-						}
-						//Thread.submit(currentList);
-					}
-					for(int j=0; j<lastSectionSize; j++)
-						{
-							currentList.append(currNodeValue);
-							currNode=currNode.next;
-							currNodeValue=currNode.value;			
-						}
-						//Thread.submit(currentList);
-						//mintCondition.add(Thread);
-					//the last thread gets the larger section.
-					try
-					{
-						List<Future<T>> mergers = allThreads.invokeAll(mintCondition);
-					}
-					catch (Exception e)
-					{
-						System.out.println("exception thrown");
-					}
-				}
-			}
-			else
-			{
-				T currNodeValue=list.head.value;
-				Node<T> currNode=list.head;
-				for (int i=0; i<12; i++)
-				{	
-					currentList.append(currNodeValue);
-					currNode=currNode.next;
-					currNodeValue=currNode.value;			
-					//Thread.submit(currentList);
-				}
-				try
-				{
-					List<Future<T>> mergers = allThreads.invokeAll(mintCondition);
-				}
-				catch (Exception e)
-				{
-					System.out.println("exception thrown");
-				}
-			}
-
-			// split list
-            Pair<LinkedList<T>,LinkedList<T>> split = split(list);
-            LinkedList<T> list1 = split.fst();
-            LinkedList<T> list2 = split.snd();
-            
-			//recurse
-			if (list1.size!=1)
-			{
-				list1=msort(list1);
-			}
-			if (list2.size !=1)
-			{
-				list2=msort(list2);
-			}
-			           
-			// merge	
-            sortedList = merge(list1, list2);
-            */
-            return null;//return sortedList;
-
+			*/
 		}
 
 		//Splitting function

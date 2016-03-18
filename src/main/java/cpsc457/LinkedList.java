@@ -360,15 +360,19 @@ public class LinkedList<T> implements Iterable<T> {
 		    Node<T> head15 = pair.fst();
 		    Node<T> head16 = pair.snd();
 
-			//code the threads should complete
- 			 	/*try
+			//code the threads should complete starts
+ 			 	/*
+			for (all threads in allThreads)
+			{
+					try
 					{
-						List<Future<T>> mergers = allThreads.invokeAll(mintCondition);
+						List<Future<T>> mergers = allThreads.invokeAll(parallel_msort(threads));
 					}
 					catch (Exception e)
 					{
 						System.out.println("exception thrown");
-					}*/
+					}
+			}*/
 			Node<T> list1 = parallel_msort(head1);
 			Node<T> list2 = parallel_msort(head2);
 			Node<T> list3 = parallel_msort(head3);
@@ -388,7 +392,32 @@ public class LinkedList<T> implements Iterable<T> {
 /*please note the threads should do this but for now i have it here to help the rest of the code work until we can fix the threads to work*/
 
 
-
+			/*
+			int j=0;
+			List <Node<T>> merge1;
+			List <Node<T>> merge2;
+			List <Node<T>> merge3;
+			for (int i=0 ; i<8; i++)
+			{
+				merge1[i]=merge(mergers[j], mergers[j+1])
+				j=j+2;
+			}
+			j=0;
+			for (int k=0; k<4; k+2)
+			{
+				merge2 [i]= merge(merge1[j], merge1[j+1]);
+				j++;
+			}
+			j=0;
+			for (int m=0; m<2; m++)
+			{
+				merge3[i]=merge(merge1[j], merge1[j+1]);
+			}
+			merged = merge(merged3[0], merged3[1]);
+			return merged
+			
+			//something like this?
+			*/
             //Merge the 16 sorted parts together
             Node<T> merged1 = merge(list1,list2);
 			Node<T> merged2 = merge(list3,list4);
@@ -414,17 +443,6 @@ public class LinkedList<T> implements Iterable<T> {
 			/* plase note: this will probably be doable in a loop once the threads are working but for now this is how i had to do it.*/
             
             return merged;
-
-            /*
-					try
-					{
-						List<Future<T>> mergers = allThreads.invokeAll(mintCondition);
-					}
-					catch (Exception e)
-					{
-						System.out.println("exception thrown");
-					}
-			*/
 		}
 
 		//Splitting function

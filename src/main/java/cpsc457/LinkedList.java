@@ -279,14 +279,28 @@ public class LinkedList<T> implements Iterable<T> {
             int depthLimit;
             
             int poolSize = 16;
+            
+            int availableThreads;
+            
+            Lock criticalSection;
     
         //Comparison function
         final Comparator<T> comp;
 
         //Constructor
         public MergeSort(Comparator<T> comp) {
+            // create a new pool of size poolSize 
             allThreads = Executors.newFixedThreadPool(poolSize);
-            depthLimit = poolSize/2; // arbitrary calculation for now
+            
+            // set the available threads in the pool to the poolSize
+            availableThreads = poolSize;
+            
+            // depth limit calculation
+            depthLimit = (int) (Math.log(poolSize)/Math.log(2));
+            
+            // initialize critical section
+            criticalSection = new ReentrantLock();
+            
             this.comp = comp;
         }
 
@@ -310,14 +324,30 @@ public class LinkedList<T> implements Iterable<T> {
 
 		public void parallel_sort(LinkedList<T> list)
 		{
-			// call correct function
-			int temp=list.size();
-			int maxDepth=temp/poolSize;
+            /*DEBUG*/
+            System.out.print("Before: ");
+            printer(list.head);
+
+			int maxDepth=(int)(Math.log(poolSize)/Math.log(2));
 			Node<T> head = parallel_msort(list.head, maxDepth);
 
             list.head = head;
+            /*DEBUG*/
+            System.out.print("After: ");
+            printer(list.head);
 			// fix list attributes (head and tail pointers)			
 		}
+        
+        public void printer(Node<T> a)
+        {
+            while(a!=null)
+            {
+                System.out.print(a.value);
+                System.out.print(", ");
+                a=a.next;
+            }
+            System.out.println();
+        }
 		
 		//#########
 		//# Steps #
@@ -360,61 +390,77 @@ public class LinkedList<T> implements Iterable<T> {
 		public Node<T> parallel_msort(Node<T> list, int maxDepth)
 		//public LinkedList<T> parallel_msort(LinkedList<T> list)
 		{
-			if(list==null || list.next==null)
+			if(list==null||list.next==null)
 			{
 				return list;
 			}
-            
-            // check if threads are available
-            
-            // else -> use regular msort
-            
             
             //Split the list to two parts
             Pair<Node<T>,Node<T>> pair = split(list);
             Node<T> head1 = pair.fst();
             Node<T> head2 = pair.snd();
             
+            Node<T> list1=null;
+            Node<T> list2=null;
+            
             /* DEBUG */
             //System.out.println("pair: " + head1.value + " " + head2.value);
             
-            //Merge sort each part
-            Future<Node<T>> future1 = allThreads.submit(new Callable()
+            // if we can still use threads
+            if(maxDepth != 0)
             {
-                public Node<T> call() throws Exception
+                //Merge sort each part
+                Future<Node<T>> future1 = allThreads.submit(new Callable()
                 {
-                    return parallel_msort(head1, maxDepth-1);
-                }
-            });
-			Node<T> list1=null;
-			Node<T> list2=null;
-            
-            // Merge sort each part
-            Future<Node<T>> future2 = allThreads.submit(new Callable()
-            {
-                public Node<T> call() throws Exception
+                    public Node<T> call() throws Exception
+                    {
+                        criticalSection.lock();
+                        try
+                        {
+                            availableThreads--;
+                            return parallel_msort(head1, maxDepth-1);
+                        }
+                        finally
+                        {
+                            criticalSection.unlock();
+                        }
+                    }
+                });
+                
+                // Merge sort each part
+                Future<Node<T>> future2 = allThreads.submit(new Callable()
                 {
-                    return parallel_msort(head2, maxDepth-1);
+                    public Node<T> call() throws Exception
+                    {
+                        criticalSection.lock();
+                        try
+                        {
+                            availableThreads--;
+                            return parallel_msort(head2, maxDepth-1);
+                        }
+                        finally
+                        {
+                            criticalSection.unlock();
+                        }
+                    }
+                });
+                
+                try
+                {
+                    list1 = future1.get();
+                    list2 = future2.get();
                 }
-            });
+                catch(Exception e)
+                {
+                    
+                }
+            }
+            else
+            {
+                    list1 = msort(list1);
+                    list2 = msort(list2);
+            }
             
-            try
-            {
-                list1 = future1.get();
-            }
-            catch(Exception e)
-            {
-                
-            }
-            
-            try
-            {
-               list2 = future2.get();
-            }
-            catch(Exception e)
-            {
-                
-            }
             //Merge the two sorted parts together
             Node<T> merged = merge(list1,list2);
             

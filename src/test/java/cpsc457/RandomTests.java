@@ -25,6 +25,21 @@ public class RandomTests {
         LinkedList.sort(list);
         long end = System.currentTimeMillis();
 
+		list.clear();
+		int m=32;
+		     for(int k=0; k<20; k++) {
+		        list.append(m);
+				if(k%2==0)
+				{
+					m=m-m*4;
+				}
+				else
+				{
+					m=m*3;
+				}
+        	}
+		LinkedList.par_sort(list);
+        
         System.err.println();
         System.err.println("Processors: "+Runtime.getRuntime().availableProcessors());
         System.err.println(end - start + " ms");
@@ -43,7 +58,7 @@ public class RandomTests {
     }
 	//Laura: if it is properly sorted each element shoulr be less than the next element.
 	//not implimented, need to impliment the iterator to make it work (?)
-	
+
 	/*
 		//DO NOT say linkedlist= new linkedlist that will break the whole thing!!! 
 		long start = System.currentTimeMillis();

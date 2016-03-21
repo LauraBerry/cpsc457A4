@@ -72,7 +72,17 @@ public class LinkedList<T> implements Iterable<T> {
 	//Returns the size of the list
     //Laura:either use meta data or a for loop 
     public int size() {
-        return  size;
+        criticalSection.lock();
+        try
+        {
+           int temp=size;
+        	return temp;
+        }
+        finally
+        {
+            criticalSection.unlock();
+        }
+
     }
     
 	//Checks if the list is empty
@@ -190,26 +200,34 @@ public class LinkedList<T> implements Iterable<T> {
 	
 	@Override
     public Iterator<T> iterator() {
-        Iterator<T> iterate = new Iterator<T>()
+		criticalSection.lock();
+		 try
+		 {
+		    Iterator<T> iterate = new Iterator<T>()
+		    {
+		        //iterator offset
+		        Node<T> offset = head;
+		        
+		        @Override
+		        public boolean hasNext()
+		        {
+		            return(offset != null);
+		        }
+		        
+		        @Override
+		        public T next()
+		        {
+		            T value = offset.value;
+		            offset = offset.next;
+		            return(value);
+		        }
+		    };
+			return iterate;
+		}
+        finally
         {
-            //iterator offset
-            Node<T> offset = head;
-            
-            @Override
-            public boolean hasNext()
-            {
-                return(offset != null);
-            }
-            
-            @Override
-            public T next()
-            {
-                T value = offset.value;
-                offset = offset.next;
-                return(value);
-            }
-        };
-        return iterate;
+            criticalSection.unlock();
+        }
     }
 	//Laura: be careful, iterator can end up being super slow, do not want this.
 	//don't use get() in the iterator
@@ -223,8 +241,15 @@ public class LinkedList<T> implements Iterable<T> {
 	
 	//Sorts the link list in serial
     private void sort(Comparator<T> comp) {
-	
-		new MergeSort<T>(comp).sort(this); //Run this within the critical section (as discussed before)
+		criticalSection.lock();
+		try
+		{
+			new MergeSort<T>(comp).sort(this); //Run this within the critical section (as discussed before)
+		}
+        finally
+        {
+            criticalSection.unlock();
+        }
 		
 		//It might not allow you to use this inside critical
 			//Create a final pointer = this then use that pointer
@@ -232,7 +257,15 @@ public class LinkedList<T> implements Iterable<T> {
 
 	//Sorts the link list in parallel (using multiple threads)
     private void par_sort(Comparator<T> comp) {
-		new MergeSort<T>(comp).parallel_sort(this); //Run this within the critical section (as discussed before)
+		criticalSection.lock();
+		 try
+		 {
+			new MergeSort<T>(comp).parallel_sort(this); //Run this within the critical section (as discussed before)
+		}
+        finally
+        {
+            criticalSection.unlock();
+        }
     }
 
 	//Merge sort
@@ -266,7 +299,6 @@ public class LinkedList<T> implements Iterable<T> {
 		
 		public void sort(LinkedList<T> list)
 		{
-			//Laura: do this one first
 			//Laura: do NOT create a new linked list here!!
 			// call correct function
 			Node<T> head = msort(list.head);
@@ -276,14 +308,15 @@ public class LinkedList<T> implements Iterable<T> {
 			
 		}
 
-		public LinkedList<T> parallel_sort(LinkedList<T> list)
+		public void parallel_sort(LinkedList<T> list)
 		{
 			// call correct function
-			//LinkedList<T> sortedList = parallel_msort(list);
+			int temp=list.size();
+			int maxDepth=temp/poolSize;
+			Node<T> head = parallel_msort(list.head, maxDepth);
 
-			// fix list attributes (head and tail pointers)
-			return list;
-			
+            list.head = head;
+			// fix list attributes (head and tail pointers)			
 		}
 		
 		//#########
@@ -324,123 +357,66 @@ public class LinkedList<T> implements Iterable<T> {
 		}
 		
 		// parallel merge sort
-		public Node<T> parallel_msort(Node<T> list)
+		public Node<T> parallel_msort(Node<T> list, int maxDepth)
 		//public LinkedList<T> parallel_msort(LinkedList<T> list)
 		{
 			if(list==null || list.next==null)
 			{
 				return list;
 			}
-			LinkedList<T> currentList= new LinkedList<T>();
-			int listSize= currentList.size();
-	
-			//break list into 16 parts
-			Pair<Node<T>,Node<T>> pair = split(list);
-		    Node<T> head1 = pair.fst();
-		    Node<T> head2 = pair.snd();
-			pair = split(head1);
-		    Node<T> head3 = pair.fst();
-		    Node<T> head4 = pair.snd();
-			pair = split(head2);
-		    Node<T> head5 = pair.fst();
-		    Node<T> head6 = pair.snd();
-			pair = split(head3);
-		    Node<T> head7 = pair.fst();
-		    Node<T> head8 = pair.snd();
-			pair = split(head5);
-		    Node<T> head9 = pair.fst();
-		    Node<T> head10 = pair.snd();
-			pair = split(head4);
-		    Node<T> head11 = pair.fst();
-		    Node<T> head12 = pair.snd();
-			pair = split(head6);
-		    Node<T> head13 = pair.fst();
-		    Node<T> head14 = pair.snd();
-			pair = split(head14);
-		    Node<T> head15 = pair.fst();
-		    Node<T> head16 = pair.snd();
-
-			//code the threads should complete starts
- 			 	/*
-			for (all threads in allThreads)
-			{
-					try
-					{
-						List<Future<T>> mergers = allThreads.invokeAll(parallel_msort(threads));
-					}
-					catch (Exception e)
-					{
-						System.out.println("exception thrown");
-					}
-			}*/
-			Node<T> list1 = parallel_msort(head1);
-			Node<T> list2 = parallel_msort(head2);
-			Node<T> list3 = parallel_msort(head3);
-			Node<T> list4 = parallel_msort(head4);
-			Node<T> list5 = parallel_msort(head5);
-			Node<T> list6 = parallel_msort(head6);
-			Node<T> list7 = parallel_msort(head7);
-			Node<T> list8 = parallel_msort(head8);
-			Node<T> list9 = parallel_msort(head9);
-			Node<T> list10 = parallel_msort(head10);
-			Node<T> list11 = parallel_msort(head11);
-			Node<T> list12 = parallel_msort(head12);
-			Node<T> list13 = parallel_msort(head13);
-			Node<T> list14 = parallel_msort(head14);
-			Node<T> list15 = parallel_msort(head15);
-			Node<T> list16 = parallel_msort(head16);
-/*please note the threads should do this but for now i have it here to help the rest of the code work until we can fix the threads to work*/
-
-
-			/*
-			int j=0;
-			List <Node<T>> merge1;
-			List <Node<T>> merge2;
-			List <Node<T>> merge3;
-			for (int i=0 ; i<8; i++)
-			{
-				merge1[i]=merge(mergers[j], mergers[j+1])
-				j=j+2;
-			}
-			j=0;
-			for (int k=0; k<4; k+2)
-			{
-				merge2 [i]= merge(merge1[j], merge1[j+1]);
-				j++;
-			}
-			j=0;
-			for (int m=0; m<2; m++)
-			{
-				merge3[i]=merge(merge1[j], merge1[j+1]);
-			}
-			merged = merge(merged3[0], merged3[1]);
-			return merged
-			
-			//something like this?
-			*/
-            //Merge the 16 sorted parts together
-            Node<T> merged1 = merge(list1,list2);
-			Node<T> merged2 = merge(list3,list4);
-			Node<T> merged3 = merge(list5,list6);
-			Node<T> merged4 = merge(list7,list8);
-			Node<T> merged5 = merge(list9,list10);
-			Node<T> merged6 = merge(list11,list12);
-			Node<T> merged7 = merge(list13,list14);
-			Node<T> merged8 = merge(list15,list16);
-
-			// merged the 8 pre-merged parts together
-			Node<T> mergedMerged1 = merge(merged1, merged2);
-			Node<T> mergedMerged2 = merge(merged3, merged4);
-			Node<T> mergedMerged3 = merge(merged5, merged6);
-			Node<T> mergedMerged4 = merge(merged7, merged8);
-
-			//merge the 4 pre-pre-merged parts together
-			Node<T> mergedMergedMerged1= merge(mergedMerged1, mergedMerged2);
-			Node<T> mergedMergedMerged2 = merge(mergedMerged3, mergedMerged4);
-
-			//finally merge the last 2 parts together.
-			Node<T> merged= merge(mergedMergedMerged1, mergedMergedMerged2);
-			/* plase note: this will probably be doable in a loop once the threads are working but for now this is how i had to do it.*/
+            
+            // check if threads are available
+            
+            // else -> use regular msort
+            
+            
+            //Split the list to two parts
+            Pair<Node<T>,Node<T>> pair = split(list);
+            Node<T> head1 = pair.fst();
+            Node<T> head2 = pair.snd();
+            
+            /* DEBUG */
+            //System.out.println("pair: " + head1.value + " " + head2.value);
+            
+            //Merge sort each part
+            Future<Node<T>> future1 = allThreads.submit(new Callable()
+            {
+                public Node<T> call() throws Exception
+                {
+                    return parallel_msort(head1, maxDepth-1);
+                }
+            });
+			Node<T> list1=null;
+			Node<T> list2=null;
+            
+            // Merge sort each part
+            Future<Node<T>> future2 = allThreads.submit(new Callable()
+            {
+                public Node<T> call() throws Exception
+                {
+                    return parallel_msort(head2, maxDepth-1);
+                }
+            });
+            
+            try
+            {
+                list1 = future1.get();
+            }
+            catch(Exception e)
+            {
+                
+            }
+            
+            try
+            {
+               list2 = future2.get();
+            }
+            catch(Exception e)
+            {
+                
+            }
+            //Merge the two sorted parts together
+            Node<T> merged = merge(list1,list2);
             
             return merged;
 		}

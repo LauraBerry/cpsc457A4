@@ -17,28 +17,13 @@ public class RandomTests {
         Random r = new Random();
         LinkedList<Integer> list = new LinkedList<Integer>();
 
-        for(int i=0; i<2e6; i++) {
+        for(int i=0; i<16e5; i++) {
             list.append(r.nextInt());
         }
 
         long start = System.currentTimeMillis();
-        LinkedList.sort(list);
+        LinkedList.par_sort(list);
         long end = System.currentTimeMillis();
-
-		list.clear();
-		int m=32;
-		     for(int k=0; k<20; k++) {
-		        list.append(m);
-				if(k%2==0)
-				{
-					m=m-m*4;
-				}
-				else
-				{
-					m=m*3;
-				}
-        	}
-		LinkedList.par_sort(list);
         
         System.err.println();
         System.err.println("Processors: "+Runtime.getRuntime().availableProcessors());
@@ -56,33 +41,7 @@ public class RandomTests {
             i++;
         }
     }
-	//Laura: if it is properly sorted each element shoulr be less than the next element.
-	//not implimented, need to impliment the iterator to make it work (?)
-
-	/*
-		//DO NOT say linkedlist= new linkedlist that will break the whole thing!!! 
-		long start = System.currentTimeMillis();
-        LinkedList.par_sort(list);
-        long end = System.currentTimeMillis();
-
-        System.err.println();
-        System.err.println("Processors: "+Runtime.getRuntime().availableProcessors());
-        System.err.println(end - start + " ms");
-        System.err.println();
-
-        int i = 0;
-        Integer prev = Integer.MIN_VALUE;
-	
-	// fyi: this style of for loop use the result of getIterator()
-	//   hence the initial NullPointerException
-        for(Integer num : list) { 
-            assertTrue(num + " found before " + prev + " at index " + i, num >= prev);
-            prev = num;
-            i++;
-        }
-    }
-	*/
-
+    
     // these tests are primarilly (but not exclusively)
     // how we will evaluate the correctness of your code
 

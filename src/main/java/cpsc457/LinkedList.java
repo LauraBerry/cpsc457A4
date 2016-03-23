@@ -163,7 +163,7 @@ public class LinkedList<T> implements Iterable<T> {
 
     //Gets a node's value at a specific index
     public T get(int index) {
-        //Laura:we are assuming this linked list is zero indexed.
+        // we are assuming this linked list is zero indexed.
 
         T value = null;
         criticalSection.lock();
@@ -194,8 +194,7 @@ public class LinkedList<T> implements Iterable<T> {
             criticalSection.unlock();
         }
     }
-    //Laura: remeber it wants the data in the node not the node itself.
-    
+	
     @Override
     public Iterator<T> iterator() {
         criticalSection.lock();
@@ -227,9 +226,6 @@ public class LinkedList<T> implements Iterable<T> {
             criticalSection.unlock();
         }
     }
-    //Laura: be careful, iterator can end up being super slow, do not want this.
-    //don't use get() in the iterator
-    //use a for loop and .next.
     
     //The next two functions, are being called by the static functions at the top of this page
     //These functions are just wrappers to prevent the static function from deciding which
@@ -309,30 +305,33 @@ public class LinkedList<T> implements Iterable<T> {
             // call correct function
             Node<T> head = msort(list.head);
 
+			// fix head
             list.head = head;
-            // fix list attributes (head and tail pointers)
             
+			// fix tail by traversing the list
+            Node<T> curr = head;
+			while(curr!=null&&curr.next != null)
+			{
+				curr = curr.next;
+			}
+			list.tail = curr;
         }
 
         public void parallel_sort(LinkedList<T> list)
         {
+            // call correct function
             Node<T> head = parallel_msort(list.head,getDepth());
 
-            list.head = head;
-            /*DEBUG
-            System.out.println("poolsize: " + getPool());*/
-            // fix list attributes (head and tail pointers)            
-        }
-        
-        public void printer(Node<T> a)
-        {
-            while(a!=null)
-            {
-                System.out.print(a.value);
-                System.out.print(", ");
-                a=a.next;
-            }
-            System.out.println();
+			// fix head
+            list.head = head;     
+
+			// fix tail by traversing the list
+            Node<T> curr = head;
+			while(curr!=null&&curr.next != null)
+			{
+				curr = curr.next;
+			}
+			list.tail = curr;			
         }
         
         //#########
@@ -359,9 +358,6 @@ public class LinkedList<T> implements Iterable<T> {
             Node<T> head1 = pair.fst();
             Node<T> head2 = pair.snd();
             
-            /* DEBUG */
-            //System.out.println("pair: " + head1.value + " " + head2.value);
-            
             //Merge sort each part
             Node<T> list1 = msort(head1);
             Node<T> list2 = msort(head2);
@@ -374,9 +370,8 @@ public class LinkedList<T> implements Iterable<T> {
         
         // parallel merge sort
         public Node<T> parallel_msort(Node<T> list,int depth)
-        //public LinkedList<T> parallel_msort(LinkedList<T> list)
         {
-            
+            // checks if list is empty or if it just has one node
             if(list==null||list.next==null)
             {
                 return list;
@@ -387,18 +382,18 @@ public class LinkedList<T> implements Iterable<T> {
             Node<T> head1 = pair.fst();
             Node<T> head2 = pair.snd();
                         
-            Node<T> list1=null;
-            Node<T> list2=null;
-            
+			// initialize heads of lists
+            Node<T> list1 = null;
+            Node<T> list2= null;
+
+			// initialize futures
             Future<Node<T>> future1 = null;
             Future<Node<T>> future2 = null;
             
             // if we can still use threads
-            if(depth >= 1)
+            if(depth > 0)
             {
-                //System.out.println("head1\t" + head1.value +"\thead2\t" + head2.value + "\tdepth\t" + getDepth() + " " + getPool());
-
-                //Merge sort each part
+                //Merge sort first part
                 future1 = allThreads.submit(new Callable()
                 {
                    public Node<T> call() throws Exception
@@ -407,7 +402,7 @@ public class LinkedList<T> implements Iterable<T> {
                    }
                 });
                 
-                //Merge sort each part
+                //Merge sort second part
                 future2 = allThreads.submit(new Callable()
                 {
                     public Node<T> call() throws Exception
@@ -416,18 +411,18 @@ public class LinkedList<T> implements Iterable<T> {
                     }
                 });
                 
-                // get return values from future
+                // get return values from future variables
                 try
                 { 
-                    list1 = future1.get();
-                    list2 = future2.get();
-                    
+					list1 = future1.get();
+					list2 = future2.get();
                 }
                 catch(Exception e)
                 {
                     System.out.println("Exception: " + e);
                 }
             }
+			// recurse using no threads
             else
             {
                 list1 = parallel_msort(head1,0);
@@ -449,15 +444,20 @@ public class LinkedList<T> implements Iterable<T> {
             Node<T> list1 = head;
             Node<T> list2 = head;
             
+			// traverse the list to find the midpoint
             while(list1!=null && list1.next!=null)
             {
+				// list1 moves faster than list2
                 list1=list1.next.next;
                 list2=list2.next;
             }
             
+			// list2 is at middle of list
+			// split the list at this point
             list2.prev.next=null;
             list2.prev=null;
             
+			// create a pair containing both list heads
             Pair<Node<T>,Node<T>> pair = new Pair(head,list2);
             
             return pair;
@@ -473,53 +473,52 @@ public class LinkedList<T> implements Iterable<T> {
             
         public Node<T> merge(Node<T> head1, Node<T> head2)
         {      
+			// temporary arbitray node for the "start" of the list
             Node<T> temp = new Node(999999);
             Node<T> curr = temp;
+			curr.prev = null;
+			
             Node<T> sorted = curr;
+			
             //1- Keep comparing the head of the two link lists
             while(head1!=null && head2!=null)
             {
                 // if head1<=head2
                 if(comp.compare(head1.value, head2.value)<0)
                 {
-                    /* DEBUG 
-                    System.out.println(head1.value + "<=" + head2.value);*/
-                    
+					// add to sorted list
                     sorted.next = head1;
+					
+					// move down the list
                     head1 = head1.next;
                 }
                 // if head1>head2
                 else
                 {
-                    /* DEBUG 
-                    System.out.print(head1.value + ">" + head2.value);*/
-                    
+					// add to sorted list
                     sorted.next = head2;
-                    
-                    /* DEBUG 
-                    System.out.println("\t\ttemp.next\t" + sorted.next.value);*/
-                    
+					
+					// move down the list
                     head2 = head2.next;
                 }
                
-                /* DEBUG 
-                System.out.println("temp before\t" + sorted.value);*/
-                
+				// move the position in the sorted list
                 sorted = sorted.next;
-                
-                /* DEBUG 
-                System.out.println("temp after\t" + sorted.value);*/
             }
             
+			// if the list is empty
             if(head1==null)
             {
+				// append the other list to the end of sorted
                 sorted.next = head2;
             }
             else
             {
+				// append the other list to the end of sorted
                 sorted.next = head1;
             }
             
+			// return the real start of the list
             return curr.next;
         }
     
@@ -553,6 +552,8 @@ public class LinkedList<T> implements Iterable<T> {
         public Node(T v)
         {
             value = v;
+			next = null;
+			prev = null;
         }
     }
  
